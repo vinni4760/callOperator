@@ -1,0 +1,229 @@
+.customer-management {
+    padding: var(--spacing-2xl);
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease;
+}
+
+.customer-form {
+    margin-top: var(--spacing-2xl);
+    margin-bottom: calc(var(--spacing-2xl) * 2);
+    padding: var(--spacing-xl);
+}
+
+.customer-form h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-lg);
+}
+
+.filters {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.filter-btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    min-width: 80px;
+    text-align: center;
+}
+
+.filter-btn:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
+    transform: translateY(-1px);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-info) 100%);
+    color: white;
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.delete-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.delete-btn:hover {
+    background: var(--color-danger);
+    color: white;
+    border-color: var(--color-danger);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    transform: translateY(-1px);
+}
+
+.delete-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+}
+
+
+.phone-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.badge-pending {
+    background: var(--color-warning-light);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
+}
+
+.badge-contacted {
+    background: var(--color-info-light);
+    color: var(--color-info);
+    border: 1px solid var(--color-info);
+}
+
+.badge-completed {
+    background: var(--color-success-light);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .customer-management {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .customer-form {
+        padding: var(--spacing-lg);
+    }
+
+    .filters {
+        overflow-x: auto;
+        padding-bottom: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+        /* Scrollbar styling */
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .filters::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .filters::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .filters::-webkit-scrollbar-thumb {
+        background: var(--color-bg-elevated);
+        border-radius: 4px;
+    }
+
+    .filter-btn {
+        flex: 0 0 auto;
+    }
+
+    /* Transform Table to Horizontal Card Scroll */
+    .table-container {
+        overflow: visible;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .table {
+        display: flex;
+        overflow-x: auto;
+        gap: var(--spacing-md);
+        padding-bottom: var(--spacing-md);
+        scroll-snap-type: x mandatory;
+        min-width: auto;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tbody {
+        display: flex;
+        gap: var(--spacing-md);
+    }
+
+    .table tr {
+        display: flex;
+        flex-direction: column;
+        min-width: 85vw;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--glass-border);
+        scroll-snap-align: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-sm) 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .table td:last-child {
+        border-bottom: none;
+        margin-top: var(--spacing-md);
+        padding-top: var(--spacing-md);
+        border-top: 1px solid var(--glass-border);
+        justify-content: center;
+    }
+
+    /* Add labels */
+    .table td::before {
+        content: attr(data-label);
+        font-weight: 500;
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+        margin-right: var(--spacing-md);
+    }
+
+    .table td .phone-cell {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .customer-management {
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+
+    .customer-form {
+        padding: var(--spacing-md);
+    }
+}

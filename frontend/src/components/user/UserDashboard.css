@@ -1,81 +1,119 @@
 .user-dashboard {
     padding: var(--spacing-2xl);
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     animation: fadeIn 0.5s ease;
 }
 
-.calls-section {
-    margin-top: var(--spacing-2xl);
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.filters {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.filter-btn {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: var(--color-bg-elevated);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    min-width: 80px;
+    text-align: center;
+}
+
+.filter-btn:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-primary);
+    color: var(--color-text-primary);
+    transform: translateY(-1px);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-info) 100%);
+    color: white;
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .calls-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: var(--spacing-lg);
-}
-
-.call-card {
-    padding: var(--spacing-xl);
-    display: flex;
-    flex-direction: column;
     gap: var(--spacing-md);
 }
 
-.call-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-sm);
+.call-card {
+    padding: var(--spacing-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    overflow: hidden;
 }
 
-.call-header h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
+.call-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
 }
 
-.call-header p {
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
+.call-card.expanded {
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
 }
 
-.call-details {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) 0;
-    border-top: 1px solid var(--glass-border);
-    border-bottom: 1px solid var(--glass-border);
-}
-
-.detail-item {
+/* Compact View */
+.card-compact {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
 }
 
-.detail-item .label {
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
+.compact-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex: 1;
 }
 
-.detail-item .value {
-    color: var(--color-text-primary);
-    font-weight: 500;
-}
-
-.feedback-submitted {
+.priority-icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    background: var(--color-bg-elevated);
+}
+
+.compact-details h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--color-text-primary);
+}
+
+.phone-number {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+}
+
+.compact-badges {
+    display: flex;
+    align-items: center;
     gap: var(--spacing-sm);
-    padding: var(--spacing-md);
-    background: var(--color-success-light);
-    border: 1px solid var(--color-success);
-    border-radius: var(--radius-md);
-    color: var(--color-success);
-    font-weight: 500;
 }
 
 @media (max-width: 768px) {
@@ -83,7 +121,30 @@
         padding: var(--spacing-lg);
     }
 
-    .calls-list {
-        grid-template-columns: 1fr;
+    .call-card {
+        padding: var(--spacing-sm);
+    }
+
+    .compact-info {
+        gap: var(--spacing-sm);
+    }
+
+    .compact-badges {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: var(--spacing-xs);
+    }
+}
+
+@media (max-width: 480px) {
+    .card-compact {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .compact-badges {
+        flex-direction: row;
+        width: 100%;
+        justify-content: flex-start;
     }
 }

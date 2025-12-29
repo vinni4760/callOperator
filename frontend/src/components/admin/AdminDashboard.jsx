@@ -6,13 +6,14 @@ import './AdminDashboard.css';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
-        totalCalls: 0,
-        pendingCalls: 0,
-        completedCalls: 0,
+        totalCustomers: 0,
+        pendingCustomers: 0,
+        contactedCustomers: 0,
+        completedCustomers: 0,
         activeUsers: 0,
-        totalFeedback: 0
+        callsToday: 0
     });
-    const [recentCalls, setRecentCalls] = useState([]);
+    const [recentCustomers, setRecentCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -21,13 +22,13 @@ const AdminDashboard = () => {
 
     const fetchDashboardData = async () => {
         try {
-            const [statsRes, callsRes] = await Promise.all([
+            const [statsRes, customersRes] = await Promise.all([
                 api.get('/admin/dashboard/stats'),
-                api.get('/admin/calls')
+                api.get('/admin/customers')
             ]);
 
             setStats(statsRes.data.data);
-            setRecentCalls(callsRes.data.data.slice(0, 5));
+            setRecentCustomers(customersRes.data.data.slice(0, 5));
             setLoading(false);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
@@ -48,13 +49,13 @@ const AdminDashboard = () => {
             <header className="dashboard-header">
                 <div>
                     <h1>Admin Dashboard</h1>
-                    <p>Manage calls, users, and monitor performance</p>
+                    <p>Manage customers, users, and monitor call activities</p>
                 </div>
                 <div className="header-actions">
-                    <Link to="/admin/calls/new" className="btn btn-primary">
-                        <FiPhone /> Add New Call
+                    <Link to="/admin/customers" className="btn btn-primary">
+                        <FiPhone /> Add Customer
                     </Link>
-                    <Link to="/admin/users/new" className="btn btn-secondary">
+                    <Link to="/admin/users" className="btn btn-secondary">
                         <FiUsers /> Add User
                     </Link>
                 </div>
@@ -66,8 +67,8 @@ const AdminDashboard = () => {
                         <FiPhone color="var(--color-info)" size={24} />
                     </div>
                     <div className="stat-content">
-                        <h3>{stats.totalCalls}</h3>
-                        <p>Total Calls</p>
+                        <h3>{stats.totalCustomers}</h3>
+                        <p>Total Customers</p>
                     </div>
                 </div>
 
@@ -76,8 +77,8 @@ const AdminDashboard = () => {
                         <FiClock color="var(--color-warning)" size={24} />
                     </div>
                     <div className="stat-content">
-                        <h3>{stats.pendingCalls}</h3>
-                        <p>Pending Feedback</p>
+                        <h3>{stats.pendingCustomers}</h3>
+                        <p>Pending Calls</p>
                     </div>
                 </div>
 
@@ -86,8 +87,8 @@ const AdminDashboard = () => {
                         <FiCheckCircle color="var(--color-success)" size={24} />
                     </div>
                     <div className="stat-content">
-                        <h3>{stats.completedCalls}</h3>
-                        <p>Completed Calls</p>
+                        <h3>{stats.callsToday}</h3>
+                        <p>Calls Today</p>
                     </div>
                 </div>
 
@@ -105,44 +106,43 @@ const AdminDashboard = () => {
             <div className="dashboard-content">
                 <div className="recent-calls-section">
                     <div className="section-header">
-                        <h2>Recent Calls</h2>
-                        <Link to="/admin/calls" className="view-all-link">
+                        <h2>Recent Customers</h2>
+                        <Link to="/admin/customers" className="view-all-link">
                             View All →
                         </Link>
                     </div>
 
                     <div className="calls-list">
-                        {recentCalls.length === 0 ? (
+                        {recentCustomers.length === 0 ? (
                             <div className="empty-state glass-card">
                                 <FiPhone size={48} color="var(--color-text-tertiary)" />
-                                <p>No calls yet</p>
-                                <Link to="/admin/calls/new" className="btn btn-primary">
-                                    Add First Call
+                                <p>No customers yet</p>
+                                <Link to="/admin/customers" className="btn btn-primary">
+                                    Add First Customer
                                 </Link>
                             </div>
                         ) : (
-                            recentCalls.map((call) => (
-                                <div key={call._id} className="call-item glass-card">
+                            recentCustomers.map((customer) => (
+                                <div key={customer._id} className="call-item glass-card">
                                     <div className="call-info">
-                                        <h3>{call.customerName}</h3>
-                                        <p>{call.phoneNumber}</p>
+                                        <h3>{customer.customerName}</h3>
+                                        <p>{customer.phoneNumber}</p>
                                         <div className="call-meta">
-                                            <span className="category-badge">{call.category}</span>
-                                            <span className={`badge badge-${call.status}`}>
-                                                {call.status}
+                                            <span className="category-badge">
+                                                <FiUsers size={12} /> {customer.assignedTo?.username}
+                                            </span>
+                                            <span className={`badge badge-${customer.status}`}>
+                                                {customer.status}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="call-details">
+                                        <span className={`priority-badge priority-${customer.priority}`}>
+                                            {customer.priority}
+                                        </span>
                                         <p className="call-date">
-                                            {new Date(call.callDate).toLocaleDateString()}
+                                            {new Date(customer.createdAt).toLocaleDateString()}
                                         </p>
-                                        {call.feedback && (
-                                            <div className="feedback-indicator">
-                                                <FiCheckCircle color="var(--color-success)" />
-                                                <span>Feedback received</span>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             ))
@@ -153,9 +153,13 @@ const AdminDashboard = () => {
                 <div className="quick-actions-section glass-card">
                     <h2>Quick Actions</h2>
                     <div className="quick-actions">
-                        <Link to="/admin/calls" className="action-btn">
+                        <Link to="/admin/customers" className="action-btn">
                             <FiPhone />
-                            <span>Manage Calls</span>
+                            <span>Manage Customers</span>
+                        </Link>
+                        <Link to="/admin/call-records" className="action-btn">
+                            <FiCheckCircle />
+                            <span>View Call Records</span>
                         </Link>
                         <Link to="/admin/users" className="action-btn">
                             <FiUsers />

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FiLogOut, FiUser, FiPhone, FiUsers, FiHome, FiMenu, FiX } from 'react-icons/fi';
+import { FiLogOut, FiUser, FiPhone, FiUsers, FiHome, FiMenu, FiX, FiFileText } from 'react-icons/fi';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -42,20 +42,20 @@ const Navbar = () => {
                             <button onClick={() => handleNavigate('/admin/dashboard')} className="nav-link">
                                 <FiHome /> Dashboard
                             </button>
-                            <button onClick={() => handleNavigate('/admin/calls')} className="nav-link">
-                                <FiPhone /> Calls
+                            <button onClick={() => handleNavigate('/admin/customers')} className="nav-link">
+                                <FiUsers /> Customers
+                            </button>
+                            <button onClick={() => handleNavigate('/admin/call-records')} className="nav-link">
+                                <FiFileText /> Call Records
                             </button>
                             <button onClick={() => handleNavigate('/admin/users')} className="nav-link">
-                                <FiUsers /> Users
+                                <FiUser /> Users
                             </button>
                         </>
                     ) : (
                         <>
                             <button onClick={() => handleNavigate('/user/dashboard')} className="nav-link">
                                 <FiHome /> Dashboard
-                            </button>
-                            <button onClick={() => handleNavigate('/user/calls')} className="nav-link">
-                                <FiPhone /> My Calls
                             </button>
                         </>
                     )}

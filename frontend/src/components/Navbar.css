@@ -117,6 +117,11 @@
         padding: 0 var(--spacing-md);
     }
 
+    .navbar {
+        background: var(--color-bg-secondary);
+        backdrop-filter: none;
+    }
+
     .hamburger-btn {
         display: flex;
         align-items: center;
@@ -130,8 +135,7 @@
         top: 70px;
         left: 0;
         right: 0;
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
+        background: var(--color-bg-secondary);
         border-bottom: 1px solid var(--glass-border);
         flex-direction: column;
         padding: var(--spacing-lg) var(--spacing-md);
@@ -153,8 +157,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: var(--glass-bg);
-        backdrop-filter: blur(20px);
+        background: var(--color-bg-secondary);
         border-top: 1px solid var(--glass-border);
         flex-direction: column;
         padding: var(--spacing-lg) var(--spacing-md);

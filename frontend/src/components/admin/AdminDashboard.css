@@ -266,15 +266,33 @@
         font-size: 1.75rem;
     }
 
+    .calls-list {
+        flex-direction: row;
+        gap: var(--spacing-md);
+        overflow-x: auto;
+        padding-bottom: var(--spacing-md);
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .call-item {
+        min-width: 85vw;
         flex-direction: column;
         align-items: flex-start;
         gap: var(--spacing-md);
+        scroll-snap-align: center;
+    }
+
+    .call-info h3 {
+        font-size: 1.1rem;
     }
 
     .call-details {
         text-align: left;
         width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .call-meta {

@@ -3,12 +3,11 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './components/Login';
 import AdminDashboard from './components/admin/AdminDashboard';
-import CallManagement from './components/admin/CallManagement';
-import CallForm from './components/admin/CallForm';
+import CustomerManagement from './components/admin/CustomerManagement';
+import CallRecordsView from './components/admin/CallRecordsView';
 import UserManagement from './components/admin/UserManagement';
 import UserDashboard from './components/user/UserDashboard';
-import CallList from './components/user/CallList';
-import FeedbackForm from './components/user/FeedbackForm';
+import CallRecordForm from './components/user/CallRecordForm';
 import Navbar from './components/Navbar';
 import './index.css';
 
@@ -38,24 +37,17 @@ function AppRoutes() {
                 </ProtectedRoute>
             } />
 
-            <Route path="/admin/calls" element={
+            <Route path="/admin/customers" element={
                 <ProtectedRoute requiredRole="admin">
                     <Navbar />
-                    <CallManagement />
+                    <CustomerManagement />
                 </ProtectedRoute>
             } />
 
-            <Route path="/admin/calls/new" element={
+            <Route path="/admin/call-records" element={
                 <ProtectedRoute requiredRole="admin">
                     <Navbar />
-                    <CallForm />
-                </ProtectedRoute>
-            } />
-
-            <Route path="/admin/calls/edit/:id" element={
-                <ProtectedRoute requiredRole="admin">
-                    <Navbar />
-                    <CallForm />
+                    <CallRecordsView />
                 </ProtectedRoute>
             } />
 
@@ -74,17 +66,10 @@ function AppRoutes() {
                 </ProtectedRoute>
             } />
 
-            <Route path="/user/calls" element={
+            <Route path="/user/call-record/:customerId" element={
                 <ProtectedRoute requiredRole="user">
                     <Navbar />
-                    <CallList />
-                </ProtectedRoute>
-            } />
-
-            <Route path="/user/feedback/:callId" element={
-                <ProtectedRoute requiredRole="user">
-                    <Navbar />
-                    <FeedbackForm />
+                    <CallRecordForm />
                 </ProtectedRoute>
             } />
 

@@ -1,6 +1,6 @@
 import express from 'express';
-import Call from '../models/Call.js';
-import CallFeedback from '../models/CallFeedback.js';
+import Customer from '../models/Customer.js';
+import CallRecord from '../models/CallRecord.js';
 import { protect } from '../middleware/auth.js';
 import { upload } from '../config/cloudinary.js';
 
@@ -9,57 +9,71 @@ const router = express.Router();
 // Apply authentication middleware to all routes
 router.use(protect);
 
-// @route   GET /api/user/calls
-// @desc    Get assigned calls for the logged-in user
+// ====== ASSIGNED CUSTOMERS ROUTES ======
+
+// @route   GET /api/user/assigned-customers
+// @desc    Get customers assigned to the logged-in user
 // @access  Private/User
-router.get('/calls', async (req, res) => {
+router.get('/assigned-customers', async (req, res) => {
     try {
-        const calls = await Call.find({ assignedUserId: req.user._id })
-            .populate('adminId', 'username email')
+        const { status } = req.query;
+        const filter = { assignedTo: req.user._id };
+
+        if (status) filter.status = status;
+
+        const customers = await Customer.find(filter)
+            .populate('createdBy', 'username email')
             .sort({ createdAt: -1 });
 
-        // Check if feedback exists for each call
-        const callsWithFeedbackStatus = await Promise.all(
-            calls.map(async (call) => {
-                const feedback = await CallFeedback.findOne({ callId: call._id });
+        // Get call history for each customer
+        const customersWithCalls = await Promise.all(
+            customers.map(async (customer) => {
+                const callCount = await CallRecord.countDocuments({
+                    customer: customer._id,
+                    user: req.user._id
+                });
                 return {
-                    ...call.toObject(),
-                    hasFeedback: !!feedback
+                    ...customer.toObject(),
+                    callCount
                 };
             })
         );
 
-        res.json({ success: true, data: callsWithFeedbackStatus });
+        res.json({ success: true, data: customersWithCalls });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// @route   GET /api/user/calls/:id
-// @desc    Get a specific call details
+// @route   GET /api/user/customers/:id
+// @desc    Get details of a specific assigned customer
 // @access  Private/User
-router.get('/calls/:id', async (req, res) => {
+router.get('/customers/:id', async (req, res) => {
     try {
-        const call = await Call.findById(req.params.id)
-            .populate('adminId', 'username email');
+        const customer = await Customer.findById(req.params.id)
+            .populate('createdBy', 'username email');
 
-        if (!call) {
-            return res.status(404).json({ success: false, message: 'Call not found' });
+        if (!customer) {
+            return res.status(404).json({ success: false, message: 'Customer not found' });
         }
 
-        // Check if this call is assigned to the current user
-        if (call.assignedUserId && call.assignedUserId.toString() !== req.user._id.toString()) {
+        // Check if this customer is assigned to the current user
+        if (customer.assignedTo.toString() !== req.user._id.toString()) {
             return res.status(403).json({ success: false, message: 'Access denied' });
         }
 
-        const feedback = await CallFeedback.findOne({ callId: call._id });
+        // Get call history for this customer by this user
+        const callHistory = await CallRecord.find({
+            customer: req.params.id,
+            user: req.user._id
+        }).sort({ callDate: -1 });
 
         res.json({
             success: true,
             data: {
-                ...call.toObject(),
-                feedback: feedback || null
+                ...customer.toObject(),
+                callHistory
             }
         });
     } catch (error) {
@@ -68,87 +82,98 @@ router.get('/calls/:id', async (req, res) => {
     }
 });
 
-// @route   POST /api/user/feedback
-// @desc    Submit feedback for a call (with optional recording)
+// @route   PUT /api/user/customers/:id/status
+// @desc    Update customer status
 // @access  Private/User
-router.post('/feedback', upload.single('recording'), async (req, res) => {
+router.put('/customers/:id/status', async (req, res) => {
     try {
-        const { callId, feedbackText, rating } = req.body;
+        const customer = await Customer.findById(req.params.id);
 
-        // Check if call exists and is assigned to user
-        const call = await Call.findById(callId);
-
-        if (!call) {
-            return res.status(404).json({ success: false, message: 'Call not found' });
+        if (!customer) {
+            return res.status(404).json({ success: false, message: 'Customer not found' });
         }
 
-        if (call.assignedUserId && call.assignedUserId.toString() !== req.user._id.toString()) {
+        // Check if this customer is assigned to the current user
+        if (customer.assignedTo.toString() !== req.user._id.toString()) {
             return res.status(403).json({ success: false, message: 'Access denied' });
         }
 
-        // Check if feedback already exists
-        const existingFeedback = await CallFeedback.findOne({ callId });
+        customer.status = req.body.status;
+        await customer.save();
 
-        if (existingFeedback) {
-            return res.status(400).json({
-                success: false,
-                message: 'Feedback already submitted for this call'
-            });
-        }
-
-        // Create feedback with recording URL if uploaded
-        const feedbackData = {
-            callId,
-            userId: req.user._id,
-            feedbackText,
-            rating: parseInt(rating)
-        };
-
-        // Add recording URL if file was uploaded
-        if (req.file) {
-            feedbackData.recordingUrl = req.file.path;
-            feedbackData.recordingPublicId = req.file.filename;
-        }
-
-        const feedback = await CallFeedback.create(feedbackData);
-
-        // Update call status to completed
-        call.status = 'completed';
-        await call.save();
-
-        res.status(201).json({ success: true, data: feedback });
+        res.json({ success: true, data: customer });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// @route   POST /api/user/upload-recording/:feedbackId
-// @desc    Upload or update recording for existing feedback
-// @access  Private/User
-router.post('/upload-recording/:feedbackId', upload.single('recording'), async (req, res) => {
-    try {
-        const feedback = await CallFeedback.findById(req.params.feedbackId);
+// ====== CALL RECORD ROUTES ======
 
-        if (!feedback) {
-            return res.status(404).json({ success: false, message: 'Feedback not found' });
+// @route   POST /api/user/call-records
+// @desc    Submit call record after making a call
+// @access  Private/User
+router.post('/call-records', upload.single('recording'), async (req, res) => {
+    try {
+        const { customerId, callDate, duration, callStatus, feedback, followUpRequired, followUpDate } = req.body;
+
+        // Check if customer exists and is assigned to user
+        const customer = await Customer.findById(customerId);
+
+        if (!customer) {
+            return res.status(404).json({ success: false, message: 'Customer not found' });
         }
 
-        // Verify user owns this feedback
-        if (feedback.userId.toString() !== req.user._id.toString()) {
+        if (customer.assignedTo.toString() !== req.user._id.toString()) {
             return res.status(403).json({ success: false, message: 'Access denied' });
         }
 
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        // Create call record
+        const callRecordData = {
+            customer: customerId,
+            user: req.user._id,
+            callDate: callDate || new Date(),
+            duration: duration ? parseInt(duration) : undefined,
+            callStatus,
+            feedback,
+            followUpRequired: followUpRequired === 'true' || followUpRequired === true,
+            followUpDate: followUpDate || null
+        };
+
+        // Add recording URL if file was uploaded
+        if (req.file) {
+            callRecordData.callRecording = req.file.path;
         }
 
-        // Update feedback with new recording
-        feedback.recordingUrl = req.file.path;
-        feedback.recordingPublicId = req.file.filename;
-        await feedback.save();
+        const callRecord = await CallRecord.create(callRecordData);
 
-        res.json({ success: true, data: feedback });
+        // Update customer status to 'contacted' if successful call
+        if (callStatus === 'successful' && customer.status === 'pending') {
+            customer.status = 'contacted';
+            await customer.save();
+        }
+
+        const populatedRecord = await CallRecord.findById(callRecord._id)
+            .populate('customer', 'customerName phoneNumber email')
+            .populate('user', 'username email');
+
+        res.status(201).json({ success: true, data: populatedRecord });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// @route   GET /api/user/call-records
+// @desc    Get logged-in user's call history
+// @access  Private/User
+router.get('/call-records', async (req, res) => {
+    try {
+        const callRecords = await CallRecord.find({ user: req.user._id })
+            .populate('customer', 'customerName phoneNumber email')
+            .sort({ callDate: -1 });
+
+        res.json({ success: true, data: callRecords });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
@@ -160,24 +185,38 @@ router.post('/upload-recording/:feedbackId', upload.single('recording'), async (
 // @access  Private/User
 router.get('/dashboard/stats', async (req, res) => {
     try {
-        const assignedCalls = await Call.countDocuments({ assignedUserId: req.user._id });
-        const completedCalls = await Call.countDocuments({
-            assignedUserId: req.user._id,
-            status: 'completed'
-        });
-        const pendingCalls = await Call.countDocuments({
-            assignedUserId: req.user._id,
+        const assignedCustomers = await Customer.countDocuments({ assignedTo: req.user._id });
+        const pendingCustomers = await Customer.countDocuments({
+            assignedTo: req.user._id,
             status: 'pending'
         });
-        const submittedFeedback = await CallFeedback.countDocuments({ userId: req.user._id });
+        const contactedCustomers = await Customer.countDocuments({
+            assignedTo: req.user._id,
+            status: 'contacted'
+        });
+        const completedCustomers = await Customer.countDocuments({
+            assignedTo: req.user._id,
+            status: 'completed'
+        });
+        const totalCallRecords = await CallRecord.countDocuments({ user: req.user._id });
+
+        // Get today's call records
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const callsToday = await CallRecord.countDocuments({
+            user: req.user._id,
+            callDate: { $gte: today }
+        });
 
         res.json({
             success: true,
             data: {
-                assignedCalls,
-                completedCalls,
-                pendingCalls,
-                submittedFeedback
+                assignedCustomers,
+                pendingCustomers,
+                contactedCustomers,
+                completedCustomers,
+                totalCallRecords,
+                callsToday
             }
         });
     } catch (error) {

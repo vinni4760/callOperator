@@ -1,7 +1,7 @@
 import express from 'express';
-import Call from '../models/Call.js';
+import Customer from '../models/Customer.js';
+import CallRecord from '../models/CallRecord.js';
 import User from '../models/User.js';
-import CallFeedback from '../models/CallFeedback.js';
 import { protect, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -10,74 +10,76 @@ const router = express.Router();
 router.use(protect);
 router.use(adminOnly);
 
-// @route   POST /api/admin/calls
-// @desc    Create a new call entry
+// ====== CUSTOMER MANAGEMENT ROUTES ======
+
+// @route   POST /api/admin/customers
+// @desc    Create a new customer and assign to user
 // @access  Private/Admin
-router.post('/calls', async (req, res) => {
+router.post('/customers', async (req, res) => {
     try {
-        const callData = {
+        const customerData = {
             ...req.body,
-            adminId: req.user._id
+            createdBy: req.user._id
         };
 
-        const call = await Call.create(callData);
-        res.status(201).json({ success: true, data: call });
+        const customer = await Customer.create(customerData);
+        const populatedCustomer = await Customer.findById(customer._id)
+            .populate('assignedTo', 'username email')
+            .populate('createdBy', 'username email');
+
+        res.status(201).json({ success: true, data: populatedCustomer });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// @route   GET /api/admin/calls
-// @desc    Get all calls with feedback
+// @route   GET /api/admin/customers
+// @desc    Get all customers with filters
 // @access  Private/Admin
-router.get('/calls', async (req, res) => {
+router.get('/customers', async (req, res) => {
     try {
-        const calls = await Call.find()
-            .populate('adminId', 'username email')
-            .populate('assignedUserId', 'username email')
+        const { status, assignedTo, priority } = req.query;
+        const filter = {};
+
+        if (status) filter.status = status;
+        if (assignedTo) filter.assignedTo = assignedTo;
+        if (priority) filter.priority = priority;
+
+        const customers = await Customer.find(filter)
+            .populate('assignedTo', 'username email')
+            .populate('createdBy', 'username email')
             .sort({ createdAt: -1 });
 
-        // Get feedback for each call
-        const callsWithFeedback = await Promise.all(
-            calls.map(async (call) => {
-                const feedback = await CallFeedback.findOne({ callId: call._id })
-                    .populate('userId', 'username email');
-                return {
-                    ...call.toObject(),
-                    feedback: feedback || null
-                };
-            })
-        );
-
-        res.json({ success: true, data: callsWithFeedback });
+        res.json({ success: true, data: customers });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// @route   GET /api/admin/calls/:id
-// @desc    Get a single call
+// @route   GET /api/admin/customers/:id
+// @desc    Get a single customer with call history
 // @access  Private/Admin
-router.get('/calls/:id', async (req, res) => {
+router.get('/customers/:id', async (req, res) => {
     try {
-        const call = await Call.findById(req.params.id)
-            .populate('adminId', 'username email')
-            .populate('assignedUserId', 'username email');
+        const customer = await Customer.findById(req.params.id)
+            .populate('assignedTo', 'username email')
+            .populate('createdBy', 'username email');
 
-        if (!call) {
-            return res.status(404).json({ success: false, message: 'Call not found' });
+        if (!customer) {
+            return res.status(404).json({ success: false, message: 'Customer not found' });
         }
 
-        const feedback = await CallFeedback.findOne({ callId: call._id })
-            .populate('userId', 'username email');
+        const callRecords = await CallRecord.find({ customer: req.params.id })
+            .populate('user', 'username email')
+            .sort({ callDate: -1 });
 
         res.json({
             success: true,
             data: {
-                ...call.toObject(),
-                feedback: feedback || null
+                ...customer.toObject(),
+                callHistory: callRecords
             }
         });
     } catch (error) {
@@ -86,48 +88,98 @@ router.get('/calls/:id', async (req, res) => {
     }
 });
 
-// @route   PUT /api/admin/calls/:id
-// @desc    Update a call
+// @route   PUT /api/admin/customers/:id
+// @desc    Update a customer (reassign, change status, etc.)
 // @access  Private/Admin
-router.put('/calls/:id', async (req, res) => {
+router.put('/customers/:id', async (req, res) => {
     try {
-        const call = await Call.findByIdAndUpdate(
+        const customer = await Customer.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true, runValidators: true }
-        );
+        )
+            .populate('assignedTo', 'username email')
+            .populate('createdBy', 'username email');
 
-        if (!call) {
-            return res.status(404).json({ success: false, message: 'Call not found' });
+        if (!customer) {
+            return res.status(404).json({ success: false, message: 'Customer not found' });
         }
 
-        res.json({ success: true, data: call });
+        res.json({ success: true, data: customer });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-// @route   DELETE /api/admin/calls/:id
-// @desc    Delete a call
+// @route   DELETE /api/admin/customers/:id
+// @desc    Delete a customer
 // @access  Private/Admin
-router.delete('/calls/:id', async (req, res) => {
+router.delete('/customers/:id', async (req, res) => {
     try {
-        const call = await Call.findByIdAndDelete(req.params.id);
+        const customer = await Customer.findByIdAndDelete(req.params.id);
 
-        if (!call) {
-            return res.status(404).json({ success: false, message: 'Call not found' });
+        if (!customer) {
+            return res.status(404).json({ success: false, message: 'Customer not found' });
         }
 
-        // Also delete associated feedback
-        await CallFeedback.deleteMany({ callId: req.params.id });
+        // Also delete associated call records
+        await CallRecord.deleteMany({ customer: req.params.id });
 
-        res.json({ success: true, message: 'Call deleted successfully' });
+        res.json({ success: true, message: 'Customer deleted successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+// ====== CALL RECORDS ROUTES ======
+
+// @route   GET /api/admin/call-records
+// @desc    Get all call records with filters
+// @access  Private/Admin
+router.get('/call-records', async (req, res) => {
+    try {
+        const { user, callStatus, startDate, endDate } = req.query;
+        const filter = {};
+
+        if (user) filter.user = user;
+        if (callStatus) filter.callStatus = callStatus;
+        if (startDate || endDate) {
+            filter.callDate = {};
+            if (startDate) filter.callDate.$gte = new Date(startDate);
+            if (endDate) filter.callDate.$lte = new Date(endDate);
+        }
+
+        const callRecords = await CallRecord.find(filter)
+            .populate('customer', 'customerName phoneNumber email')
+            .populate('user', 'username email')
+            .sort({ callDate: -1 });
+
+        res.json({ success: true, data: callRecords });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// @route   GET /api/admin/customers/:id/calls
+// @desc    Get call history for specific customer
+// @access  Private/Admin
+router.get('/customers/:id/calls', async (req, res) => {
+    try {
+        const callRecords = await CallRecord.find({ customer: req.params.id })
+            .populate('user', 'username email')
+            .sort({ callDate: -1 });
+
+        res.json({ success: true, data: callRecords });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ====== USER MANAGEMENT ROUTES (Unchanged) ======
 
 // @route   POST /api/admin/users
 // @desc    Create a new user
@@ -180,25 +232,35 @@ router.get('/users', async (req, res) => {
     }
 });
 
+// ====== DASHBOARD STATS ======
+
 // @route   GET /api/admin/dashboard/stats
 // @desc    Get dashboard statistics
 // @access  Private/Admin
 router.get('/dashboard/stats', async (req, res) => {
     try {
-        const totalCalls = await Call.countDocuments();
-        const pendingCalls = await Call.countDocuments({ status: 'pending' });
-        const completedCalls = await Call.countDocuments({ status: 'completed' });
+        const totalCustomers = await Customer.countDocuments();
+        const pendingCustomers = await Customer.countDocuments({ status: 'pending' });
+        const contactedCustomers = await Customer.countDocuments({ status: 'contacted' });
+        const completedCustomers = await Customer.countDocuments({ status: 'completed' });
         const activeUsers = await User.countDocuments({ role: 'user' });
-        const totalFeedback = await CallFeedback.countDocuments();
+
+        // Get today's call records
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const callsToday = await CallRecord.countDocuments({
+            callDate: { $gte: today }
+        });
 
         res.json({
             success: true,
             data: {
-                totalCalls,
-                pendingCalls,
-                completedCalls,
+                totalCustomers,
+                pendingCustomers,
+                contactedCustomers,
+                completedCustomers,
                 activeUsers,
-                totalFeedback
+                callsToday
             }
         });
     } catch (error) {
