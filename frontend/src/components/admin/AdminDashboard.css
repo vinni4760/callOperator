@@ -271,15 +271,21 @@
         gap: var(--spacing-md);
         overflow-x: auto;
         padding-bottom: var(--spacing-md);
+        /* Add side padding - use negative margin on container if needed, or just padding on list */
+        padding-left: var(--spacing-sm);
+        padding-right: var(--spacing-sm);
+        /* Ensure it goes full width but padded */
+        margin: 0 calc(var(--spacing-md) * -1);
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
     }
 
     .call-item {
-        min-width: 85vw;
+        min-width: 75vw;
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--spacing-md);
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
         scroll-snap-align: center;
     }
 

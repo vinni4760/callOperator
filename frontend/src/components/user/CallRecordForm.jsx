@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiPhone, FiClock, FiMic, FiCheckCircle, FiCalendar } from 'react-icons/fi';
+import { FiPhone, FiClock, FiMic, FiCheckCircle, FiCalendar, FiChevronLeft, FiChevronRight, FiChevronDown } from 'react-icons/fi';
 import api from '../../api/axios';
 import './CallRecordForm.css';
 
@@ -21,6 +23,25 @@ const CallRecordForm = () => {
     const [recordingFile, setRecordingFile] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isStatusOpen, setIsStatusOpen] = useState(false);
+    const statusDropdownRef = useRef(null);
+
+    const statusOptions = [
+        { value: 'successful', label: 'Successful' },
+        { value: 'no-answer', label: 'No Answer' },
+        { value: 'busy', label: 'Busy' },
+        { value: 'voicemail', label: 'Voicemail' }
+    ];
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target)) {
+                setIsStatusOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
         fetchCustomer();
@@ -166,14 +187,48 @@ const CallRecordForm = () => {
                             <label className="input-label">
                                 <FiCalendar size={16} /> Call Date & Time *
                             </label>
-                            <input
-                                type="datetime-local"
-                                name="callDate"
-                                className="input-field"
-                                value={formData.callDate}
-                                onChange={handleChange}
-                                required
-                            />
+                            <div className="date-picker-wrapper-custom">
+                                <DatePicker
+                                    selected={formData.callDate ? new Date(formData.callDate) : new Date()}
+                                    onChange={(date) => setFormData({ ...formData, callDate: date ? date.toISOString() : '' })}
+                                    showTimeSelect
+                                    dateFormat="MMM d, yyyy h:mm aa"
+                                    className="input-field"
+                                    wrapperClassName="date-picker-full-width"
+                                    calendarClassName="custom-datepicker"
+                                    placeholderText="Select date and time"
+                                    required
+                                    renderCustomHeader={({
+                                        date,
+                                        decreaseMonth,
+                                        increaseMonth,
+                                        prevMonthButtonDisabled,
+                                        nextMonthButtonDisabled,
+                                    }) => (
+                                        <div className="custom-calendar-header">
+                                            <button
+                                                onClick={decreaseMonth}
+                                                disabled={prevMonthButtonDisabled}
+                                                type="button"
+                                                className="calendar-nav-btn"
+                                            >
+                                                <FiChevronLeft />
+                                            </button>
+                                            <span className="calendar-month-year">
+                                                {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                            </span>
+                                            <button
+                                                onClick={increaseMonth}
+                                                disabled={nextMonthButtonDisabled}
+                                                type="button"
+                                                className="calendar-nav-btn"
+                                            >
+                                                <FiChevronRight />
+                                            </button>
+                                        </div>
+                                    )}
+                                />
+                            </div>
                         </div>
 
                         <div className="input-group">
@@ -194,18 +249,33 @@ const CallRecordForm = () => {
 
                     <div className="input-group">
                         <label className="input-label">Call Status *</label>
-                        <select
-                            name="callStatus"
-                            className="select-field"
-                            value={formData.callStatus}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="successful">Successful</option>
-                            <option value="no-answer">No Answer</option>
-                            <option value="busy">Busy</option>
-                            <option value="voicemail">Voicemail</option>
-                        </select>
+                        <div className="custom-select-wrapper" ref={statusDropdownRef}>
+                            <div
+                                className={`custom-select-trigger ${isStatusOpen ? 'open' : ''}`}
+                                onClick={() => setIsStatusOpen(!isStatusOpen)}
+                            >
+                                <span>
+                                    {statusOptions.find(opt => opt.value === formData.callStatus)?.label || 'Select Status'}
+                                </span>
+                                <FiChevronDown className={`select-arrow-icon ${isStatusOpen ? 'rotate' : ''}`} />
+                            </div>
+                            {isStatusOpen && (
+                                <div className="custom-select-options">
+                                    {statusOptions.map((option) => (
+                                        <div
+                                            key={option.value}
+                                            className={`custom-option ${formData.callStatus === option.value ? 'selected' : ''}`}
+                                            onClick={() => {
+                                                setFormData({ ...formData, callStatus: option.value });
+                                                setIsStatusOpen(false);
+                                            }}
+                                        >
+                                            {option.label}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="input-group">
@@ -258,13 +328,46 @@ const CallRecordForm = () => {
                     {formData.followUpRequired && (
                         <div className="input-group">
                             <label className="input-label">Follow-up Date</label>
-                            <input
-                                type="date"
-                                name="followUpDate"
-                                className="input-field"
-                                value={formData.followUpDate}
-                                onChange={handleChange}
-                            />
+                            <div className="date-picker-wrapper-custom">
+                                <DatePicker
+                                    selected={formData.followUpDate ? new Date(formData.followUpDate) : null}
+                                    onChange={(date) => setFormData({ ...formData, followUpDate: date ? date.toISOString().split('T')[0] : '' })}
+                                    dateFormat="MMM d, yyyy"
+                                    className="input-field"
+                                    wrapperClassName="date-picker-full-width"
+                                    calendarClassName="custom-datepicker"
+                                    placeholderText="Select follow-up date"
+                                    renderCustomHeader={({
+                                        date,
+                                        decreaseMonth,
+                                        increaseMonth,
+                                        prevMonthButtonDisabled,
+                                        nextMonthButtonDisabled,
+                                    }) => (
+                                        <div className="custom-calendar-header">
+                                            <button
+                                                onClick={decreaseMonth}
+                                                disabled={prevMonthButtonDisabled}
+                                                type="button"
+                                                className="calendar-nav-btn"
+                                            >
+                                                <FiChevronLeft />
+                                            </button>
+                                            <span className="calendar-month-year">
+                                                {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                                            </span>
+                                            <button
+                                                onClick={increaseMonth}
+                                                disabled={nextMonthButtonDisabled}
+                                                type="button"
+                                                className="calendar-nav-btn"
+                                            >
+                                                <FiChevronRight />
+                                            </button>
+                                        </div>
+                                    )}
+                                />
+                            </div>
                         </div>
                     )}
 

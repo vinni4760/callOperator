@@ -155,6 +155,10 @@
         /* Ensure horizontal scroll persists on mobile */
         gap: var(--spacing-md);
         padding-bottom: var(--spacing-md);
+        padding-left: var(--spacing-sm);
+        padding-right: var(--spacing-sm);
+        margin: 0 calc(var(--spacing-md) * -1);
+        width: calc(100% + var(--spacing-xl));
         /* Snap scrolling for better mobile experience */
         scroll-snap-type: x mandatory;
     }
