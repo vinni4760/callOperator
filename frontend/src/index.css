@@ -4,33 +4,33 @@
   --color-bg-secondary: #131827;
   --color-bg-tertiary: #1a1f35;
   --color-bg-elevated: #1f2542;
-  
+
   /* Glass Effect */
   --glass-bg: rgba(31, 37, 66, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
-  
+
   /* Accent Colors */
   --color-primary: #6366f1;
   --color-primary-hover: #4f46e5;
   --color-primary-light: rgba(99, 102, 241, 0.1);
-  
+
   --color-success: #10b981;
   --color-success-light: rgba(16, 185, 129, 0.1);
-  
+
   --color-warning: #f59e0b;
   --color-warning-light: rgba(245, 158, 11, 0.1);
-  
+
   --color-danger: #ef4444;
   --color-danger-light: rgba(239, 68, 68, 0.1);
-  
+
   --color-info: #3b82f6;
   --color-info-light: rgba(59, 130, 246, 0.1);
-  
+
   /* Text Colors */
   --color-text-primary: #f1f5f9;
   --color-text-secondary: #94a3b8;
   --color-text-tertiary: #64748b;
-  
+
   /* Spacing */
   --spacing-xs: 0.5rem;
   --spacing-sm: 0.75rem;
@@ -38,19 +38,30 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
-  
+
+  /* Responsive Breakpoints */
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1440px;
+
+  /* Touch Target Sizes */
+  --touch-target-min: 44px;
+  --tap-spacing: 8px;
+
   /* Border Radius */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
-  
+
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
@@ -310,8 +321,13 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Animations */
@@ -320,6 +336,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -339,15 +356,37 @@ body {
   text-align: right;
 }
 
-.mt-1 { margin-top: var(--spacing-xs); }
-.mt-2 { margin-top: var(--spacing-sm); }
-.mt-3 { margin-top: var(--spacing-md); }
-.mt-4 { margin-top: var(--spacing-lg); }
+.mt-1 {
+  margin-top: var(--spacing-xs);
+}
 
-.mb-1 { margin-bottom: var(--spacing-xs); }
-.mb-2 { margin-bottom: var(--spacing-sm); }
-.mb-3 { margin-bottom: var(--spacing-md); }
-.mb-4 { margin-bottom: var(--spacing-lg); }
+.mt-2 {
+  margin-top: var(--spacing-sm);
+}
+
+.mt-3 {
+  margin-top: var(--spacing-md);
+}
+
+.mt-4 {
+  margin-top: var(--spacing-lg);
+}
+
+.mb-1 {
+  margin-bottom: var(--spacing-xs);
+}
+
+.mb-2 {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mb-3 {
+  margin-bottom: var(--spacing-md);
+}
+
+.mb-4 {
+  margin-bottom: var(--spacing-lg);
+}
 
 .flex {
   display: flex;
@@ -387,4 +426,84 @@ body {
 
 .h-full {
   height: 100%;
+}
+
+/* Mobile Responsive Utilities */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+
+  .admin-dashboard,
+  .user-dashboard {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .glass-card {
+    padding: var(--spacing-md);
+  }
+
+  .btn {
+    min-height: var(--touch-target-min);
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .input-field,
+  .textarea-field,
+  .select-field {
+    min-height: var(--touch-target-min);
+    padding: var(--spacing-md);
+    font-size: 16px;
+    /* Prevents zoom on iOS */
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .admin-dashboard,
+  .user-dashboard {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
+  .glass-card {
+    padding: var(--spacing-sm);
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Prevent horizontal scroll */
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+/* Mobile container */
+.container-mobile {
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+
+@media (max-width: 480px) {
+  .container-mobile {
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+  }
 }

@@ -133,14 +133,58 @@
 
 @media (max-width: 768px) {
     .feedback-container {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .call-info-card,
+    .feedback-form {
         padding: var(--spacing-lg);
     }
 
     .info-grid {
         grid-template-columns: 1fr;
+        gap: var(--spacing-md);
     }
 
     .rating-input {
         justify-content: center;
+        gap: var(--spacing-md);
+    }
+
+    .star-btn {
+        font-size: 1.75rem;
+    }
+
+    .file-input-label {
+        padding: var(--spacing-xl);
+        min-height: var(--touch-target-min);
+    }
+}
+
+@media (max-width: 480px) {
+    .feedback-container {
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+
+    .call-info-card,
+    .feedback-form {
+        padding: var(--spacing-md);
+    }
+
+    .call-info-card h2,
+    .feedback-form h2 {
+        font-size: 1.25rem;
+    }
+
+    .rating-input {
+        gap: var(--spacing-sm);
+    }
+
+    .star-btn {
+        font-size: 1.5rem;
+    }
+
+    .info-item .value {
+        font-size: 1rem;
     }
 }

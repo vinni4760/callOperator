@@ -1,15 +1,27 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FiLogOut, FiUser, FiPhone, FiUsers, FiHome } from 'react-icons/fi';
+import { FiLogOut, FiUser, FiPhone, FiUsers, FiHome, FiMenu, FiX } from 'react-icons/fi';
 import './Navbar.css';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
+        setIsMobileMenuOpen(false);
+    };
+
+    const handleNavigate = (path) => {
+        navigate(path);
+        setIsMobileMenuOpen(false);
+    };
+
+    const toggleMobileMenu = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
     return (
@@ -20,32 +32,36 @@ const Navbar = () => {
                     <span>Call Center</span>
                 </div>
 
-                <div className="navbar-menu">
+                <button className="hamburger-btn" onClick={toggleMobileMenu} aria-label="Toggle menu">
+                    {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+                </button>
+
+                <div className={`navbar-menu ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
                     {user?.role === 'admin' ? (
                         <>
-                            <button onClick={() => navigate('/admin/dashboard')} className="nav-link">
+                            <button onClick={() => handleNavigate('/admin/dashboard')} className="nav-link">
                                 <FiHome /> Dashboard
                             </button>
-                            <button onClick={() => navigate('/admin/calls')} className="nav-link">
+                            <button onClick={() => handleNavigate('/admin/calls')} className="nav-link">
                                 <FiPhone /> Calls
                             </button>
-                            <button onClick={() => navigate('/admin/users')} className="nav-link">
+                            <button onClick={() => handleNavigate('/admin/users')} className="nav-link">
                                 <FiUsers /> Users
                             </button>
                         </>
                     ) : (
                         <>
-                            <button onClick={() => navigate('/user/dashboard')} className="nav-link">
+                            <button onClick={() => handleNavigate('/user/dashboard')} className="nav-link">
                                 <FiHome /> Dashboard
                             </button>
-                            <button onClick={() => navigate('/user/calls')} className="nav-link">
+                            <button onClick={() => handleNavigate('/user/calls')} className="nav-link">
                                 <FiPhone /> My Calls
                             </button>
                         </>
                     )}
                 </div>
 
-                <div className="navbar-user">
+                <div className={`navbar-user ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
                     <div className="user-info">
                         <FiUser />
                         <span>{user?.username}</span>
