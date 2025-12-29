@@ -1,9 +1,9 @@
 :root {
   /* Color Palette - Premium Light Theme */
-  --color-bg-primary: #f8fafc;
-  /* Slate 50 */
-  --color-bg-secondary: #f1f5f9;
-  /* Slate 100 */
+  --color-bg-primary: #EEEEEE;
+  /* User Requested Gray */
+  --color-bg-secondary: #E0E0E0;
+  /* Slightly darker for contrast */
   --color-bg-tertiary: #ffffff;
   /* White */
   --color-bg-elevated: #ffffff;
