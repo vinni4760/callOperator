@@ -1,35 +1,49 @@
 :root {
-  /* Color Palette - Premium Dark Theme */
-  --color-bg-primary: #0a0e1a;
-  --color-bg-secondary: #131827;
-  --color-bg-tertiary: #1a1f35;
-  --color-bg-elevated: #1f2542;
+  /* Color Palette - Premium Light Theme */
+  --color-bg-primary: #f8fafc;
+  /* Slate 50 */
+  --color-bg-secondary: #f1f5f9;
+  /* Slate 100 */
+  --color-bg-tertiary: #ffffff;
+  /* White */
+  --color-bg-elevated: #ffffff;
+  /* White */
 
-  /* Glass Effect */
-  --glass-bg: rgba(31, 37, 66, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  /* Glass Effect - Adapted for Light Mode */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --hover-overlay: rgba(0, 0, 0, 0.05);
 
   /* Accent Colors */
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
+  --color-primary: #4f46e5;
+  /* Indigo 600 - Slightly darker for better contrast on white */
+  --color-primary-hover: #4338ca;
+  /* Indigo 700 */
   --color-primary-light: rgba(99, 102, 241, 0.1);
 
-  --color-success: #10b981;
+  --color-success: #059669;
+  /* Emerald 600 */
   --color-success-light: rgba(16, 185, 129, 0.1);
 
-  --color-warning: #f59e0b;
+  --color-warning: #d97706;
+  /* Amber 600 */
   --color-warning-light: rgba(245, 158, 11, 0.1);
 
-  --color-danger: #ef4444;
+  --color-danger: #dc2626;
+  /* Red 600 */
   --color-danger-light: rgba(239, 68, 68, 0.1);
 
-  --color-info: #3b82f6;
+  --color-info: #2563eb;
+  /* Blue 600 */
   --color-info-light: rgba(59, 130, 246, 0.1);
 
   /* Text Colors */
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-text-tertiary: #64748b;
+  --color-text-primary: #0f172a;
+  /* Slate 900 */
+  --color-text-secondary: #475569;
+  /* Slate 600 */
+  --color-text-tertiary: #94a3b8;
+  /* Slate 400 */
 
   /* Spacing */
   --spacing-xs: 0.5rem;
@@ -56,11 +70,11 @@
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+  /* Shadows - Adjusted for Light Mode */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
   /* Transitions */
   --transition-fast: 150ms ease;
