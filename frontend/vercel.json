@@ -1,28 +1,9 @@
 {
-    "routes": [
-        {
-            "src": "/[^.]+",
-            "dest": "/",
-            "status": 200
-        }
-    ],
-    "headers": [
+    "cleanUrls": true,
+    "rewrites": [
         {
             "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "X-Content-Type-Options",
-                    "value": "nosniff"
-                },
-                {
-                    "key": "X-Frame-Options",
-                    "value": "DENY"
-                },
-                {
-                    "key": "X-XSS-Protection",
-                    "value": "1; mode=block"
-                }
-            ]
+            "destination": "/index.html"
         }
     ]
 }
