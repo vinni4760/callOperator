@@ -2,6 +2,21 @@
 
 A full-stack call center management application with separate admin and user dashboards.
 
+## 🚀 Deployment
+
+### Production URLs
+- **Frontend**: Deploy to Vercel
+- **Backend**: Deploy to Render
+- **Database**: MongoDB Atlas
+
+See the [Deployment Guide](.agent/workflows/deploy.md) for detailed instructions.
+
+### Quick Deploy
+```bash
+# See deployment workflow
+cat .agent/workflows/deploy.md
+```
+
 ## Features
 
 ### Admin Dashboard
